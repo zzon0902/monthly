@@ -7,10 +7,19 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; }
-    .chart-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: space-around; }
+    .chart-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: space-around; margin-bottom: 40px; }
     .chart-block { text-align: center; }
     canvas { margin-top: 10px; }
     .input-group { margin-bottom: 10px; }
+    .report-section { margin-top: 50px; border-top: 2px solid #ccc; padding-top: 30px; }
+    .info-table { margin-bottom: 30px; }
+    .info-table td { padding: 5px 15px; font-size: 16px; }
+    textarea { width: 100%; height: 100px; margin-bottom: 20px; font-size: 14px; padding: 10px; }
+    .learning-list { margin-top: 10px; }
+    .learning-list li { margin-bottom: 5px; }
+    input[type="text"], input[type="month"] { padding: 5px; font-size: 14px; margin-left: 10px; }
+    .box { border: 2px solid #ccc; padding: 20px; margin-bottom: 30px; border-radius: 8px; background-color: #f9f9f9; }
+    .month-display { font-size: 16px; font-weight: normal; color: #555; margin-left: 10px; }
   </style>
 </head>
 <body>
@@ -18,6 +27,13 @@
   <h2>Enter Student Achievement Data</h2>
 
   <div>
+    <h3>Student Info</h3>
+    <div class="input-group">
+      Name: <input type="text" id="studentName">
+      Level: <input type="text" id="studentLevel">
+      Month: <input type="month" id="reportMonth">
+    </div>
+
     <h3>Attendance</h3>
     <div class="input-group">
       Present: <input type="number" id="present" value="20">
@@ -36,21 +52,63 @@
       Incorrect: <input type="number" id="incorrect" value="3">
     </div>
 
-    <button onclick="updateCharts()">Update Charts</button>
+    <h3>Comment</h3>
+    <textarea id="commentInput" placeholder="Write a summary or feedback here..."></textarea>
+
+    <h3>What the student has learned</h3>
+    <div class="input-group">
+      Vocabulary: <input type="text" id="vocab">
+    </div>
+    <div class="input-group">
+      Grammar: <input type="text" id="grammar">
+    </div>
+    <div class="input-group">
+      Sentence Structure: <input type="text" id="structure">
+    </div>
+
+    <button onclick="updateReportAndCharts()">Update Report</button>
   </div>
 
-  <div class="chart-container">
-    <div class="chart-block">
-      <h4>ATTENDANCE</h4>
-      <canvas id="attendanceChart" width="250" height="250"></canvas>
+  <div class="report-section">
+    <h2>Monthly Report <span id="monthDisplay" class="month-display"></span></h2>
+
+    <table class="info-table">
+      <tr>
+        <td><strong>Name:</strong> <span id="nameDisplay">____________________</span></td>
+        <td><strong>Level:</strong> <span id="levelDisplay">____________________</span></td>
+      </tr>
+    </table>
+
+    <div class="box">
+      <h3>Student Achievement Overview</h3>
+      <div class="chart-container">
+        <div class="chart-block">
+          <h4>ATTENDANCE</h4>
+          <canvas id="attendanceChart" width="250" height="250"></canvas>
+        </div>
+        <div class="chart-block">
+          <h4>PERFORMANCE</h4>
+          <canvas id="performanceChart" width="250" height="250"></canvas>
+        </div>
+        <div class="chart-block">
+          <h4>TEST RESULT</h4>
+          <canvas id="testChart" width="250" height="250"></canvas>
+        </div>
+      </div>
     </div>
-    <div class="chart-block">
-      <h4>PERFORMANCE</h4>
-      <canvas id="performanceChart" width="250" height="250"></canvas>
+
+    <div class="box">
+      <h3>Comment</h3>
+      <p id="commentDisplay">__________________________________________</p>
     </div>
-    <div class="chart-block">
-      <h4>TEST RESULT</h4>
-      <canvas id="testChart" width="250" height="250"></canvas>
+
+    <div class="box">
+      <h3>What the student has learned</h3>
+      <ul class="learning-list">
+        <li><strong>Vocabulary:</strong> <span id="vocabDisplay">__________________________</span></li>
+        <li><strong>Grammar:</strong> <span id="grammarDisplay">__________________________</span></li>
+        <li><strong>Sentence Structure:</strong> <span id="structureDisplay">___________________</span></li>
+      </ul>
     </div>
   </div>
 
@@ -78,15 +136,12 @@
             },
             datalabels: {
               color: '#000',
-              font: {
-                weight: 'bold'
-              },
+              font: { weight: 'bold' },
               formatter: (value, context) => {
                 const dataset = context.chart.data.datasets[0].data;
                 const total = dataset.reduce((sum, val) => sum + val, 0);
                 const percent = total > 0 ? Math.round((value / total) * 100) : 0;
-                const label = context.chart.data.labels[context.dataIndex];
-                return `${label}: ${percent}%`;
+                return `${context.chart.data.labels[context.dataIndex]}: ${percent}%`;
               }
             },
             tooltip: {
@@ -105,7 +160,20 @@
       });
     }
 
-    function updateCharts() {
+    function updateReportAndCharts() {
+      const name = document.getElementById('studentName').value;
+      const level = document.getElementById('studentLevel').value;
+      const month = document.getElementById('reportMonth').value;
+
+      document.getElementById('nameDisplay').textContent = name || '____________________';
+      document.getElementById('levelDisplay').textContent = level || '____________________';
+      document.getElementById('monthDisplay').textContent = month ? `(${month})` : '';
+
+      document.getElementById('commentDisplay').textContent = document.getElementById('commentInput').value || '__________________________________________';
+      document.getElementById('vocabDisplay').textContent = document.getElementById('vocab').value || '__________________________';
+      document.getElementById('grammarDisplay').textContent = document.getElementById('grammar').value || '__________________________';
+      document.getElementById('structureDisplay').textContent = document.getElementById('structure').value || '___________________';
+
       const present = +document.getElementById('present').value;
       const absent = +document.getElementById('absent').value;
       const excellent = +document.getElementById('excellent').value;
