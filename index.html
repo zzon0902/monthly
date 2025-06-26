@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Achievement Charts</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .chart-container { display: flex; gap: 30px; flex-wrap: wrap; }
+    .input-group { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Enter Student Achievement Data</h2>
+
+  <div>
+    <h3>Attendance</h3>
+    <div class="input-group">
+      Present: <input type="number" id="present" value="75">
+      Absent: <input type="number" id="absent" value="25">
+    </div>
+
+    <h3>Performance</h3>
+    <div class="input-group">
+      Excellent: <input type="number" id="excellent" value="85">
+      Room for Progress: <input type="number" id="progress" value="15">
+    </div>
+
+    <h3>Test</h3>
+    <div class="input-group">
+      Correct: <input type="number" id="correct" value="27">
+      Incorrect: <input type="number" id="incorrect" value="3">
+    </div>
+
+    <button onclick="updateCharts()">Update Charts</button>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="attendanceChart" width="250" height="250"></canvas>
+    <canvas id="performanceChart" width="250" height="250"></canvas>
+    <canvas id="testChart" width="250" height="250"></canvas>
+  </div>
+
+  <script>
+    let attendanceChart, performanceChart, testChart;
+
+    function createChart(ctx, labels, data, color) {
+      return new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: color
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    function updateCharts() {
+      // Get input values
+      const present = +document.getElementById('present').value;
+      const absent = +document.getElementById('absent').value;
+      const excellent = +document.getElementById('excellent').value;
+      const progress = +document.getElementById('progress').value;
+      const correct = +document.getElementById('correct').value;
+      const incorrect = +document.getElementById('incorrect').value;
+
+      // Update chart data
+      attendanceChart.data.datasets[0].data = [present, absent];
+      performanceChart.data.datasets[0].data = [excellent, progress];
+      testChart.data.datasets[0].data = [correct, incorrect];
+
+      attendanceChart.update();
+      performanceChart.update();
+      testChart.update();
+    }
+
+    // Initial chart render
+    window.onload = function () {
+      const attCtx = document.getElementById('attendanceChart').getContext('2d');
+      const perfCtx = document.getElementById('performanceChart').getContext('2d');
+      const testCtx = document.getElementById('testChart').getContext('2d');
+
+      attendanceChart = createChart(attCtx, ['Present', 'Absent'], [75, 25], ['#66bb6a', '#ef5350']);
+      performanceChart = createChart(perfCtx, ['Excellent', 'Room for Progress'], [85, 15], ['#42a5f5', '#90caf9']);
+      testChart = createChart(testCtx, ['Correct', 'Incorrect'], [27, 3], ['#ffca28', '#ff7043']);
+    };
+  </script>
+
+</body>
+</html>
